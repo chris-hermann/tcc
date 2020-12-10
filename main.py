@@ -1,5 +1,5 @@
 import tkinter as tk
-import tractor, talhao, implemento
+import tractor, talhao, implemento, cf_simples
 
 class MainPage:
     def __init__(self, master):
@@ -8,10 +8,12 @@ class MainPage:
         self.tratorButton = tk.Button(self.frame, text = 'Trator', width = 25, command = self.trator_window)
         self.talhaoButton = tk.Button(self.frame, text = 'Talhão', width = 25, command = self.talhao_window)
         self.implementoButton = tk.Button(self.frame, text = 'Implemento', width = 25, command = self.implemento_window)
+        self.custofixoButton = tk.Button(self.frame, text = 'Simulação simples de custo-fixo', width = 25, command =self.custofixo_simples_window)
         self.quitButton = tk.Button(self.frame, text = 'Sair', width = 25, command = self.destroy_window)
         self.tratorButton.grid()
         self.talhaoButton.grid()
         self.implementoButton.grid()
+        self.custofixoButton.grid()
         self.quitButton.grid()
         self.frame.grid()
 
@@ -29,6 +31,10 @@ class MainPage:
     def talhao_window(self):
     	self.talhaoWindow = tk.Toplevel(self.master)
     	self.app = talhao.TalhaoPage(self.talhaoWindow)
+
+    def custofixo_simples_window(self):
+    	self.cf_simplesWindow = tk.Toplevel(self.master)
+    	self.app = cf_simples.CFPage(self.cf_simplesWindow)
 
 
     def destroy_window(self):
