@@ -7,20 +7,29 @@ class CFPage:
 		self.master = master
 		self.master.title('Simulação simples do custo fixo')
 		self.frame_inputs = tk.Frame(self.master)
+		self.spacerFrame1 = tk.Frame(self.master)
 		self.frame_trv = tk.Frame(self.master)
+		self.frame_buttons = tk.Frame(self.master)
+		self.spacerFrame1.grid()
 		self.frame_inputs.grid()
 		self.frame_trv.grid()
+		self.frame_buttons.grid()
 
 		self.combo = tk.ttk.Combobox(self.frame_inputs, values=['Tratores', 'Implementos'])
-		self.combo.grid()
+		self.combo.grid(row=0, column=1)
 		self.combo.bind('<<ComboboxSelected>>', self.combo_action)
-		self.labelSpacer1 = tk.Label(self.frame_inputs).grid()
+		self.labelSpacer1 = tk.Label(self.spacerFrame1).grid()
+		self.labelSpacer2 = tk.Label(self.frame_inputs).grid()
 
 		self.trv = tk.ttk.Treeview(self.frame_trv, columns=(1,2,3), displaycolumns=('2','3'), show='headings', height='3', selectmode='browse')
 		self.trv.grid()
+		self.trv_label = tk.Label(self.frame_trv)
+		self.trv_label.grid()
 
-		self.actionButton = tk.Button(self.frame_trv, text='Simular custo fixo simples', command=self.simulate)
-		self.actionButton.grid()
+		self.actionButton = tk.Button(self.frame_buttons, text='Simular custo fixo simples', command=self.simulate)
+		self.actionButton.grid(row=0, column=0, padx=5, pady=5)
+		self.quitButton = tk.Button(self.frame_buttons, text='Voltar', command=self.master.destroy)
+		self.quitButton.grid(row=0, column=1, padx=5, pady=5)
 		
 		self.cf_horaLabel = tk.Label(self.frame_trv)
 		self.cf_totalLabel = tk.Label(self.frame_trv)
@@ -34,12 +43,14 @@ class CFPage:
 		self.cf_seguroLabel.grid()
 		self.cf_garagemLabel.grid()
 		self.cf_horaLabel.grid()
+		self.comboLabel = tk.Label(self.frame_inputs, text='Selecione uma opção: ').grid(row=0, column=0)
 		
 
 
 		
 
 	def combo_action(self, eventObject):
+		self.trv_label.config(text='Selecione o trator ou implemento e clique no botão abaixo')
 		self.combo = eventObject.widget.get()
 		if self.combo == 'Tratores':
 			self.trv.heading(2, text='Nome')
@@ -54,7 +65,6 @@ class CFPage:
 				self.trv.insert('', "end", values=i)
 			conn.commit() #Commitando as alterações
 			conn.close() #Fechando a conexão
-
 		elif self.combo == 'Implementos':
 			self.trv.heading(2, text='Nome')
 			self.trv.heading(3, text='Tipo')
@@ -70,6 +80,7 @@ class CFPage:
 			conn.close() #Fechando a conexão
 
 	def simulate(self):
+		self.trv_label.grid_forget()
 		if self.combo == 'Tratores':
 			conn = sqlite3.connect('database.db')
 			c = conn.cursor()
@@ -87,7 +98,7 @@ class CFPage:
 			self.vGaragem = float(self.data[7].strip(' '))
 			self.vidaUtil = float(self.data[8].strip(' '))
 			self.horaAno = float(self.data[9].strip('[]() '))
-
+			self.calculate()
 		elif self.combo == 'Implementos':
 			conn = sqlite3.connect('database.db')
 			c = conn.cursor()
@@ -104,49 +115,19 @@ class CFPage:
 			self.vSeguro = float(self.data[8].strip(' '))
 			self.vGaragem = float(self.data[9].strip(' '))
 			self.vidaUtil = float(self.data[10].strip(' '))
-			self.horaAno = float(self.data[11].strip("[]() '"))						
+			self.horaAno = float(self.data[11].strip("[]() '"))			
+			self.calculate()			
 
+	def calculate(self):
 		self.depreciacao = self.vCompra - (self.vCompra * 0.1)
 		self.juro = (self.vJuro / 100) * ((self.vCompra + (self.vCompra + 0.1)) / 2)
 		self.garagem = (self.vGaragem / 100) * self.vCompra
 		self.seguro = (self.vSeguro / 100) * self.vCompra
 		self.cfsimples_total = self.depreciacao + self.juro + self.garagem + self.seguro
 		self.cfsimples_hora = self.cfsimples_total / (self.vidaUtil * self.horaAno)
-
 		self.cf_totalLabel.config(text='O custo fixo total será de ' + str("%.3f" % self.cfsimples_total) + ' reais ao longo de toda a vida útil especificada.')
 		self.cf_depreciacaoLabel.config(text='   O custo de depreciação será de ' + str("%.3f" % self.depreciacao) + ' reais.')
 		self.cf_juroLabel.config(text='   O custo de juro sobre o capital será de ' + str("%.3f" % self.juro) + ' reais.')
 		self.cf_garagemLabel.config(text='   O custo com garagem será de ' + str("%.3f" % self.garagem) + ' reais.')
 		self.cf_seguroLabel.config(text='   O custo com seguro será de ' + str("%.3f" % self.seguro) + ' reais.')
 		self.cf_horaLabel.config(text='O custo fixo diluido nas horas trabalhadas será de ' + str("%.3f" % self.cfsimples_hora) + ' reais.')
-	
-
-
-		print(self.data)
-		print(self.data[0].strip("[]() '"))
-		print(self.data[1].strip("[]()' "))
-		print(self.vCompra)
-		print(self.vJuro)
-		print(self.vSeguro)
-		print(self.vGaragem)
-		print(self.vidaUtil)
-		print(self.horaAno)
-		print(self.depreciacao)
-		print(self.juro)
-		print(self.garagem)
-		print(self.seguro)
-		print(self.cfsimples_total)
-		print(self.cfsimples_hora)
-
-
-		
-
-'''
-dep = pu - (pu * 0.1)
-juro = (tj / 100) * ((pu + (pu + 0.1)) / 2)
-gar = (tg / 100) * pu
-seg = (ts / 100) * pu
-cf_total = dep + juro + gar + seg
-cf_hora = cf_total / (vu * hora_ano)
-cv_manutencao = ((tm / 100) * pu) / (vu * hora_ano)
-'''

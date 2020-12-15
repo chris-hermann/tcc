@@ -11,16 +11,16 @@ class ImplementoPage:
 		self.implemento = tk.ttk.Combobox(self.frame_inputs, width=50, values=['',
 																	'Arado de aivecas',
 																	'Arado de discos',
-																	'Subsolador, ponteira simples',
-																	'Subsolador, ponteira com asas',
-																	'Grade de discos, ação dupla em X - Tandem',
-																	'Grade de discos, ação dupla em V - Offset',
-																	'Grade de discos, ação simples',
+																	'Subsolador - ponteira simples',
+																	'Subsolador - ponteira com asas',
+																	'Grade de discos - ação dupla em X - Tandem',
+																	'Grade de discos - ação dupla em V - Offset',
+																	'Grade de discos - ação simples',
 																	'Cultivador de campo',
-																	'Encanteirador',
+																	'Sulcador',
 																	'Semeadora montada (sementes graúdas)',
 																	'Semeadora de arrasto (sementes graúdas)',
-																	'Semeadora, adubadora, pulverizadora (sementes graúdas)',
+																	'Semeadora - adubadora - pulverizadora (sementes graúdas)',
 																	'Semeadora montada (sementes miúdas)',
 																	'Semeadora de arrasto (sementes miúdas)'])
 		self.nome = tk.Entry(self.frame_inputs)
@@ -132,18 +132,18 @@ class ImplementoPage:
 		#Rotina para inserir os valores no banco de dados dependendo do tipo de implemento
 		if self.implemento.get() == '' or self.nome.get() == '':
 			messagebox.showerror(title=None, message="Favor preencha todos os campos!") 
-		elif self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos, ação dupla em X - Tandem' \
-			 or self.implemento.get() == 'Grade de discos, ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco, ação simples':
+		elif self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos - ação dupla em X - Tandem' \
+			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco, ação simples':
 			values_db = "INSERT INTO implemento(nome, tipo, larg, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), self.largura.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))
-		elif self.implemento.get() == 'Subsolador, ponteira simples' or self.implemento.get() == 'Subsolador, ponteira com asas' or self.implemento.get() == 'Cultivador de campo':
+		elif self.implemento.get() == 'Subsolador - ponteira simples' or self.implemento.get() == 'Subsolador - ponteira com asas' or self.implemento.get() == 'Cultivador de campo':
 			mult = float(self.orgaos.get()) * float(self.distancia.get())
 			values_db = "INSERT INTO implemento(nome, tipo, larg, org, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora, adubadora, pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "INSERT INTO implemento(nome, tipo, larg, linhas, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?,?)"
@@ -156,18 +156,18 @@ class ImplementoPage:
 	def update_db(self):
 		conn = sqlite3.connect('database.db') #Criando ou conectando ao banco de dados
 		c = conn.cursor() #Configurando o cursor para navegar no banco de dados
-		if self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos, ação dupla em X - Tandem' \
-			 or self.implemento.get() == 'Grade de discos, ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco, ação simples':
+		if self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos - ação dupla em X - Tandem' \
+			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco, ação simples':
 			query = "UPDATE implemento SET nome=?, tipo=?, larg=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
 			c.execute(query, (self.nome.get(), self.implemento.get(), self.largura.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get(), self.id))
-		elif self.implemento.get() == 'Subsolador, ponteira simples' or self.implemento.get() == 'Subsolador, ponteira com asas' or self.implemento.get() == 'Cultivador de campo':
+		elif self.implemento.get() == 'Subsolador - ponteira simples' or self.implemento.get() == 'Subsolador - ponteira com asas' or self.implemento.get() == 'Cultivador de campo':
 			mult = float(self.orgaos.get()) * float(self.distancia.get())
 			values_db = "UPDATE implemento SET nome=?, tipo=?, larg=?, org=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get(), self.id))
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora, adubadora, pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "UPDATE implemento SET nome=?, tipo=?, larg=?, linhas=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
@@ -212,13 +212,13 @@ class ImplementoPage:
 	def callback(self, eventObject):
 		
 		implemento = eventObject.widget.get()
-		if implemento == 'Arado de aivecas' or implemento == 'Arado de discos' or implemento == 'Grade de discos, ação dupla em X - Tandem' or \
-		implemento == 'Grade de discos, ação dupla em V - Offset' or implemento == 'Grade de discos, ação simples':
+		if implemento == 'Arado de aivecas' or implemento == 'Arado de discos' or implemento == 'Grade de discos - ação dupla em X - Tandem' or \
+		implemento == 'Grade de discos - ação dupla em V - Offset' or implemento == 'Grade de discos - ação simples':
 			self.implemento_larg()
-		elif implemento == 'Subsolador, ponteira simples' or implemento == 'Subsolador, ponteira com asas' or implemento == 'Cultivador de campo':
+		elif implemento == 'Subsolador - ponteira simples' or implemento == 'Subsolador - ponteira com asas' or implemento == 'Cultivador de campo':
 			self.implemento_orgaos()
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora, adubadora, pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			self.implemento_linhas()
 		elif implemento == '':
