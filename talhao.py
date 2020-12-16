@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
+import tkinter.font as tkFont
 
 class TalhaoPage:
 	def __init__(self, master):
@@ -33,25 +34,24 @@ class TalhaoPage:
 		self.quitButton.pack()
 		self.frame_inputs.grid()
 		self.frame_buttons.grid()
-
 		self.frame_trv = tk.Frame(self.master)
 		self.frame_trv.grid(row=5, column=0, columnspan=3, padx=3, pady=3, sticky=tk.E+tk.W)
-		self.trv_hist = tk.ttk.Treeview(self.frame_trv, columns=(1,2,3,4), show="headings", height='5', selectmode='browse')
+		self.spacelabel1 = tk.Label(self.frame_trv).pack()
+		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
+		self.trvLabel = tk.Label(self.frame_trv, text='Histórico', font=self.titlefont, anchor = tk.W).pack()
+		self.trvHelper = tk.Label(self.frame_trv, text='Dê um clique duplo em algum item do histórico para editar os valores de entrada').pack()
+		self.trv_hist = tk.ttk.Treeview(self.frame_trv, columns=(1,2,3,4), show="headings", height='3', selectmode='browse')
 		self.trv_hist.pack(side=tk.TOP)
-		self.hozscrlbar = tk.ttk.Scrollbar(self.frame_trv, orient=tk.HORIZONTAL, command=self.trv_hist.xview)
-		self.hozscrlbar.pack(side=tk.BOTTOM, fill='x')
 		#self.verscrlbar = ttk.Scrollbar(frame_trv, orient=VERTICAL, command=trv_hist.yview)
 		#self.verscrlbar.pack(side=RIGHT, fill='y')
-		self.trv_hist.configure(xscrollcommand=self.hozscrlbar.set)
-
 		self.trv_hist.heading(1, text="Id")
 		self.trv_hist.heading(2, text="Nome")
 		self.trv_hist.heading(3, text="Área (ha)")
 		self.trv_hist.heading(4, text="Textura")
-		self.trv_hist.column('1', width=50, minwidth=30, anchor='center')
-		self.trv_hist.column('2', width=50, minwidth=60, anchor='center')
-		self.trv_hist.column('3', width=50, minwidth=108, anchor='center')
-		self.trv_hist.column('4', width=50, minwidth=108, anchor='center')
+		self.trv_hist.column('1', width=80, anchor='center')
+		self.trv_hist.column('2', width=80, anchor='center')
+		self.trv_hist.column('3', width=80, anchor='center')
+		self.trv_hist.column('4', width=80, anchor='center')
 		self.update_trv()
 		self.trv_hist.bind('<Double 1>', self.getrow)
 

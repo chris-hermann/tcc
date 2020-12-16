@@ -1,5 +1,7 @@
 import tkinter as tk
 import sqlite3
+from tkinter import messagebox, ttk
+import tkinter.font as tkFont
 
 class ImplementoPage:
 	def __init__(self, master):
@@ -20,7 +22,7 @@ class ImplementoPage:
 																	'Sulcador',
 																	'Semeadora montada (sementes graúdas)',
 																	'Semeadora de arrasto (sementes graúdas)',
-																	'Semeadora - adubadora - pulverizadora (sementes graúdas)',
+																	'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)',
 																	'Semeadora montada (sementes miúdas)',
 																	'Semeadora de arrasto (sementes miúdas)'])
 		self.nome = tk.Entry(self.frame_inputs)
@@ -75,32 +77,36 @@ class ImplementoPage:
 
 		self.frame_trv = tk.Frame(self.master)
 		self.frame_trv.grid()
+		self.spacelabel1 = tk.Label(self.frame_trv).grid()
+		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
+		self.trvLabel = tk.Label(self.frame_trv, text='Histórico', font=self.titlefont, anchor = tk.W).grid()
+		self.trvHelper = tk.Label(self.frame_trv, text='Dê um clique duplo em algum item do histórico para editar os valores de entrada').grid()
 		self.trv_hist = tk.ttk.Treeview(self.frame_trv, columns=(1,2,3,4,5,6,7,8,9,10,11,12), show="headings", height='9')
 		self.trv_hist.grid(row=7, column=0, columnspan=3, ipadx=150, pady=10)
 		self.trv_hist.heading(1, text="ID")
-		self.trv_hist.heading(2, text="NOME")
-		self.trv_hist.heading(3, text="TIPO")
-		self.trv_hist.heading(4, text="LARGURA")
-		self.trv_hist.heading(5, text="ÓRGÃOS ATIVOS")
-		self.trv_hist.heading(6, text="NUM LINHAS")
+		self.trv_hist.heading(2, text="Nome")
+		self.trv_hist.heading(3, text="Tipo")
+		self.trv_hist.heading(4, text="Largura (m)")
+		self.trv_hist.heading(5, text="Nº de órgãos")
+		self.trv_hist.heading(6, text="Nº de linhas")
 		self.trv_hist.heading(7, text="Valor de compra (R$)")
 		self.trv_hist.heading(8, text="Juros")
 		self.trv_hist.heading(9, text="Seguro")
 		self.trv_hist.heading(10, text="Garagem")
 		self.trv_hist.heading(11, text="Horas Ano")
 		self.trv_hist.heading(12, text="Vida Util")
-		self.trv_hist.column('1', width=20)
-		self.trv_hist.column('2', width=40)
-		self.trv_hist.column('3', width=40)
-		self.trv_hist.column('4', width=20)
-		self.trv_hist.column('5', width=20)
-		self.trv_hist.column('6', width=20)
-		self.trv_hist.column('7', width=20)
-		self.trv_hist.column('8', width=20)
-		self.trv_hist.column('9', width=20)
-		self.trv_hist.column('10', width=20)
-		self.trv_hist.column('11', width=20)
-		self.trv_hist.column('12', width=20)
+		self.trv_hist.column('1', width=20, minwidth=80)
+		self.trv_hist.column('2', width=40, minwidth=80)
+		self.trv_hist.column('3', width=40, minwidth=80)
+		self.trv_hist.column('4', width=20, minwidth=80)
+		self.trv_hist.column('5', width=20, minwidth=80)
+		self.trv_hist.column('6', width=20, minwidth=80)
+		self.trv_hist.column('7', width=20, minwidth=115)
+		self.trv_hist.column('8', width=20, minwidth=80)
+		self.trv_hist.column('9', width=20, minwidth=80)
+		self.trv_hist.column('10', width=20, minwidth=80)
+		self.trv_hist.column('11', width=20, minwidth=80)
+		self.trv_hist.column('12', width=20, minwidth=80)
 		self.update_trv()
 		#self.#historico = Listbox(windowip, selectmode=SINGLE, xscrollcommand=scrollbarx.set)
 		self.scrollbarx = tk.Scrollbar(self.frame_trv, orient=tk.HORIZONTAL, command=self.trv_hist.xview)
@@ -120,7 +126,7 @@ class ImplementoPage:
 								 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 								 nome TEXT NOT NULL,
 								 tipo TEXT NOT NULL,
-								 larg REAL,
+								 larg REAL NOT NULL,
 								 org INTEGER,
 								 linhas INTEGER,
 								 compra REAL,
@@ -133,7 +139,7 @@ class ImplementoPage:
 		if self.implemento.get() == '' or self.nome.get() == '':
 			messagebox.showerror(title=None, message="Favor preencha todos os campos!") 
 		elif self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos - ação dupla em X - Tandem' \
-			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco, ação simples':
+			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco - ação simples':
 			values_db = "INSERT INTO implemento(nome, tipo, larg, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), self.largura.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))
@@ -143,7 +149,7 @@ class ImplementoPage:
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "INSERT INTO implemento(nome, tipo, larg, linhas, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?,?)"
@@ -167,7 +173,7 @@ class ImplementoPage:
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get(), self.id))
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "UPDATE implemento SET nome=?, tipo=?, larg=?, linhas=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
@@ -218,7 +224,7 @@ class ImplementoPage:
 		elif implemento == 'Subsolador - ponteira simples' or implemento == 'Subsolador - ponteira com asas' or implemento == 'Cultivador de campo':
 			self.implemento_orgaos()
 		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora - adubadora - pulverizadora (sementes graúdas)' \
+			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
 			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
 			self.implemento_linhas()
 		elif implemento == '':

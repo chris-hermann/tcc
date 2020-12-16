@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
+import tkinter.font as tkFont
 
 
 class TratorPage:
 	def __init__(self, master):
 		self.master = master
 		self.master.title('Trator')
-		self.master.geometry('500x500')
 
 		#Configuração da GUI
 		self.frame = tk.Frame(self.master)
@@ -31,7 +31,7 @@ class TratorPage:
 		self.horaAno.grid(row=7, column=1)
 		self.vidaUtil.grid(row=8, column=1)
 		self.submitButton = tk.Button(self.frame, text = 'Inserir', width = 25, command = self.submit)
-		self.quitButton = tk.Button(self.frame, text = 'Sair', width = 25, command = self.close_windows)
+		self.quitButton = tk.Button(self.frame, text = 'Voltar', width = 25, command = self.close_windows)
 		self.cleanButton = tk.Button(self.frame, text = 'Limpar', width = 25, command = self.clean)
 		self.updateButton = tk.Button(self.frame, text = 'Atualizar', width = 25, command = self.update_db)
 		self.deleteButton = tk.Button(self.frame, text = 'Deletar', width = 25, command = self.delete)
@@ -53,9 +53,12 @@ class TratorPage:
 		self.garagem_label = tk.Label(self.frame_inputs, text = 'Taxa de garagem (%): ').grid(row=6, column=0)
 		self.horaAno_label = tk.Label(self.frame_inputs, text = 'Horas trabalhadas por ano: ').grid(row=7, column=0)
 		self.vidaUtil_label = tk.Label(self.frame_inputs, text = 'Vida Útil (anos): ').grid(row=8, column=0)
-
 		self.frame_trv = tk.Frame(self.master)
 		self.frame_trv.grid(row=12, column=0, columnspan=3, padx=3, pady=3, sticky=tk.E+tk.W)
+		self.spacelabel1 = tk.Label(self.frame_trv).pack()
+		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
+		self.trvLabel = tk.Label(self.frame_trv, text='Histórico', font=self.titlefont, anchor = tk.W).pack()
+		self.trvHelper = tk.Label(self.frame_trv, text='Dê um clique duplo em algum item do histórico para editar os valores de entrada').pack()
 		self.trv_hist = tk.ttk.Treeview(self.frame_trv, columns=(1,2,3,4,5,6,7,8,9,10), show="headings", height='5', selectmode='browse')
 		self.trv_hist.pack(side=tk.TOP)
 		self.hozscrlbar = tk.ttk.Scrollbar(self.frame_trv, orient=tk.HORIZONTAL, command=self.trv_hist.xview)

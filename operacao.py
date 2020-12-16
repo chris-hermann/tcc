@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3, re, parameters, math, outputs
+import tkinter.font as tkFont
 
 class OperacaoPage():
 	def __init__(self, master):
@@ -17,7 +18,12 @@ class OperacaoPage():
 		self.trv_talhao = tk.ttk.Treeview(self.frame_inputs, columns=(1,2,3), show="headings", height='3', selectmode='browse', displaycolumns=('2','3'))
 		self.trv_implemento = tk.ttk.Treeview(self.frame_inputs, columns=(1,2,3), show="headings", height='3', selectmode='browse', displaycolumns=('2','3'))
 		self.trv_talhao.grid(row=1, column=0, padx=3, pady=3)
-		self.trv_trator.column('2', width=20, minwidth=50)
+		self.trv_talhao.column('2', width=80, anchor='center')
+		self.trv_talhao.column('3', width=80, anchor='center')
+		self.trv_trator.column('2', width=80, anchor='center', minwidth=50)
+		self.trv_trator.column('3', width=80, anchor='center', minwidth=50)
+		self.trv_implemento.column('2', width=110, anchor='center', minwidth=50)
+		self.trv_implemento.column('3', width=370, anchor='center', minwidth=50)
 		self.trv_trator.heading(2, text='Nome')
 		self.trv_trator.heading(3, text='Potência (cv)')
 		self.trv_talhao.heading(2, text='Nome')
@@ -40,6 +46,12 @@ class OperacaoPage():
 		self.profundidade = tk.Entry(self.frame_inputs)
 		self.passada = tk.ttk.Combobox(self.frame_inputs, values=['Primeira', 'Segunda'])
 		self.passadaLabel = tk.Label(self.frame_inputs, text='Passada?')
+		self.precoDiesel = tk.Entry(self.frame_inputs)
+		self.precoOleo = tk.Entry(self.frame_inputs)
+		self.precoTratorista = tk.Entry(self.frame_inputs)
+		self.precoDieselLabel = tk.Label(self.frame_inputs, text='Preço do diesel (R$/L): ')
+		self.precoOleoLabel = tk.Label(self.frame_inputs, text='Preço do óleo (R$/L): ')
+		self.precoTratoristaLabel = tk.Label(self.frame_inputs, text='Preço do tratorista (R$/h): ')
 		self.profundidadeLabel = tk.Label(self.frame_inputs,text='Profundidade de operação (cm):')
 		self.simulateButton = tk.Button(self.frame_buttons, text='Simular operação', command=self.simulate)
 		self.simulateButton.grid(row=0, column=0, padx=3, pady=7)
@@ -47,7 +59,11 @@ class OperacaoPage():
 		self.submitButton = tk.Button(self.frame_buttons, text='Salvar simulação', command=self.submitDB)
 		self.submitButton.grid(row=0, column=1, padx=2, pady=7)
 		self.quitButton.grid(row=0, column=2, padx=3, pady=7)
-		self.trv_hist = tk.ttk.Treeview(self.frame_hist, columns=(1,2,3,4,5,6,7,8,9,10,11), show='headings', height='3', selectmode='browse', displaycolumns=('5','6','7','8','9','10','11'))
+		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
+		self.spacerLabel2 = tk.Label(self.frame_buttons).grid(row=1)
+		self.trvLabel = tk.Label(self.frame_hist, text='Histórico', font=self.titlefont, anchor = tk.W).grid()
+		self.trvHelper = tk.Label(self.frame_hist, text='Dê um clique duplo em algum item do histórico para visualizar o resultado da simulação').grid()
+		self.trv_hist = tk.ttk.Treeview(self.frame_hist, columns=(1,2,3,4,5,6,7,8,9,10,11,12,13,14), show='headings', height='3', selectmode='browse', displaycolumns=('5','6','7','8','9','10','11','12','13','14'))
 		self.trv_hist.heading(5, text='Nome do talhão')
 		self.trv_hist.heading(6, text='Nome do trator')
 		self.trv_hist.heading(7, text='Nome do implemento')
@@ -55,8 +71,24 @@ class OperacaoPage():
 		self.trv_hist.heading(9, text='Profundidade')
 		self.trv_hist.heading(10, text='Superficie')
 		self.trv_hist.heading(11, text='Passada')
+		self.trv_hist.heading(12, text='Preço diesel')
+		self.trv_hist.heading(13, text='Preço óleo')
+		self.trv_hist.heading(14, text='Preço tratorista')
+		self.trv_hist.column('5', minwidth=30, width=95, anchor='center')
+		self.trv_hist.column('6', minwidth=30, width=95, anchor='center')
+		self.trv_hist.column('7', minwidth=30, width=130, anchor='center')
+		self.trv_hist.column('8', minwidth=30, width=70, anchor='center')
+		self.trv_hist.column('9', minwidth=30, width=80, anchor='center')
+		self.trv_hist.column('10', minwidth=30, width=70, anchor='center')
+		self.trv_hist.column('11', minwidth=30, width=70, anchor='center')
+		self.trv_hist.column('12', minwidth=30, width=70, anchor='center')
+		self.trv_hist.column('13', minwidth=30, width=70, anchor='center')
+		self.trv_hist.column('14', minwidth=30, width=95, anchor='center')
 		self.trv_hist.grid(padx=3, pady=3)
 		self.trv_hist.bind('<Double 1>', self.view_simulation)
+		self.hozscrlbar = tk.ttk.Scrollbar(self.frame_hist, orient=tk.HORIZONTAL, command=self.trv_hist.xview)
+		self.hozscrlbar.grid(sticky=tk.S, columnspan=2)
+		self.trv_hist.configure(xscrollcommand=self.hozscrlbar.set)
 		self.update_trv()
 	
 
@@ -115,6 +147,12 @@ class OperacaoPage():
 						self.tipo == 'Grade de discos - ação simples' or self.tipo == 'Cultivador de campo':
 			self.passada.grid(row=5, column=1)
 			self.passadaLabel.grid(row=5, column=0)
+		self.precoDieselLabel.grid(row=6, column=0)
+		self.precoOleoLabel.grid(row=7, column=0)
+		self.precoTratoristaLabel.grid(row=8, column=0)
+		self.precoDiesel.grid(row=6, column=1)
+		self.precoOleo.grid(row=7, column=1)
+		self.precoTratorista.grid(row=8, column=1)
 
 	def simulate(self):
 		self.talhao_selection = self.trv_talhao.item(self.trv_talhao.focus())
@@ -145,9 +183,11 @@ class OperacaoPage():
 		self.orgaosImplemento = self.implementoData[4].strip(' ')
 		self.linhasImplemento = self.implementoData[5].strip(' ')
 		self.velocidadeOperacao = float(self.velocidade.get())
-		self.profundidadeOperacao = float(self.profundidade.get())
+		self.profundidadeOperacao = self.profundidade.get()
 		if self.profundidadeOperacao == '':
 			self.profundidadeOperacao = 1
+		else:
+			self.profundidadeOperacao = float(self.profundidadeOperacao)
 		self.passadaOperacao = str(self.passada.get())
 		self.soloOperacao = str(self.condicaoSolo.get())
 		self.rTranmissaoKey = self.transmissaoTrator + self.soloOperacao
@@ -175,6 +215,8 @@ class OperacaoPage():
 			self.parametersKey = self.parametersKey.replace("(","")
 			self.parametersList = parameters.Parametros.get(self.parametersKey)
 			self.parametersList = str(self.parametersList)
+			print(self.parametersKey)
+			print(self.parametersList)
 			self.parametersList = self.parametersList.split(',')
 			self.parametroA = float(self.parametersList[0].strip("[]()' "))
 			self.parametroB = float(self.parametersList[1].strip("[]()' "))
@@ -187,7 +229,9 @@ class OperacaoPage():
 		self.potencia_req_bt = (self.forca_requerida_op * self.velocidadeOperacao) / 3.6
 		self.potencia_req_tdp = self.potencia_req_bt / self.coefTransmissao
 		self.potencia_disp_tdp = (self.potenciaMotor * 0.83) * 0.735499
-		self.teste_tracao(self.potencia_req_tdp, self.potencia_disp_tdp)
+		self.messageValue = self.teste_tracao(self.potencia_req_tdp, self.potencia_disp_tdp)
+		if self.messageValue == 'ok':
+			return
 		self.fatorX = self.potencia_req_tdp / self.potencia_disp_tdp
 		self.raiz = 738 * self.fatorX + 173
 		self.consumoCombEspecifico = 2.64 * self.fatorX + 3.91 - 0.203 * math.sqrt(self.raiz)
@@ -197,9 +241,12 @@ class OperacaoPage():
 		self.capCampoTeorica = self.velocidadeOperacao * self.larguraImplemento / 10
 		self.capCampoEfetiva = self.velocidadeOperacao * self.larguraImplemento * self.eficiencia_campo / 10
 		self.horasTrabalhadas = self.areaTalhao / self.capCampoEfetiva
+		self.custoCombustivel = self.consumoCombHora * float(self.precoDiesel.get())
+		self.custoOleo = self.consumoOleoHora * float(self.precoOleo.get())
+		self.custoTratorista = float(self.precoTratorista.get())
+		self.custoVariavel = self.custoCombustivel + self.custoOleo + self.custoTratorista
 		self.print_results()
 		
-
 	def searchDB(self, id, table):
 		self.conn = sqlite3.connect('database.db')
 		self.c = self.conn.cursor()
@@ -282,13 +329,18 @@ class OperacaoPage():
 		self.app.capCampoTLabel.config(text= 'Capacidade de campo teórica (ha/h): ' + str("%.2f" % self.capCampoTeorica))
 		self.app.capCampoELabel.config(text= 'Capacidade de campo efetiva (ha/h): ' + str("%.2f" % self.capCampoEfetiva))
 		self.app.tempoLabel.config(text= 'Tempo total de operação (horas): ' + str("%.2f" % self.horasTrabalhadas))
+		self.app.custoCombustivel.config(text='Custo de combustivel por hora (R$/h): ' + str("%.2f" % self.custoCombustivel))
+		self.app.custoOleo.config(text='Custo de óleo por hora (R$/h): ' + str("%.2f" % self.custoOleo))
+		self.app.custoTratorista.config(text='Custo de tratorista por hora (R$/h): ' + str("%.2f" % self.custoTratorista))
+		self.app.custoVariavel.config(text='Custo variavel por hora (R$/h): ' + str("%.2f" % self.custoVariavel))
 
 	def teste_tracao(self, pot_req, pot_disp):
 		pot_req += (0.1 * pot_req)
 		if pot_req >= pot_disp:
-			messagebox.showerror(title=None, message="O trator não tem potência suficiente para tracionar este implemento nestas condições. \
+			self.teste = messagebox.showerror(title=None, message="O trator não tem potência suficiente para tracionar este implemento nestas condições. \
 				É necessário mudar o trator ou implemento, ou ainda diminuir a velocidade ou profundidade de operação. A potência disponível \
 				na TDP é " + str("%.3f" % pot_disp) + ". Enquanto a potência requerida pela operação é " + str("%.3f" % pot_req))
+			return self.teste
 		else:
 			pass
 
@@ -306,33 +358,43 @@ class OperacaoPage():
 
 	def view_simulation(self, event):
 		self.trv_selection = self.trv_hist.item(self.trv_hist.focus())
-		self.id_talhao = self.trv_selection['values'][0]
-		self.id_trator = self.trv_selection['values'][1]
-		self.id_implemento = self.trv_selection['values'][2]
+		self.id_talhao = self.trv_selection['values'][1]
+		self.id_trator = self.trv_selection['values'][2]
+		self.id_implemento = self.trv_selection['values'][3]
+		print(self.id_implemento)
 		for i in self.trv_trator.get_children():
-			self.id = self.trv_trator.item(i)['values'][0]
-			if self.id == self.id_trator:
+			self.id_trv_trator = self.trv_trator.item(i)['values'][0]
+			if self.id_trv_trator == self.id_trator:
 				self.trv_trator.selection_set(i)
 				self.trv_trator.focus(i)
+				pass
 		for i in self.trv_talhao.get_children():
-			self.id = self.trv_talhao.item(i)['values'][0]
-			if self.id == self.id_talhao:
+			self.id_trv_talhao = self.trv_talhao.item(i)['values'][0]
+			if self.id_trv_talhao == self.id_talhao:
 				self.trv_talhao.selection_set(i)
 				self.trv_talhao.focus(i)
+				pass
 		for i in self.trv_implemento.get_children():
-			self.id = self.trv_implemento.item(i)['values'][0]
-			if self.id == self.id_implemento:
+			self.id_trv_implemento = self.trv_implemento.item(i)['values'][0]
+			if self.id_trv_implemento == self.id_implemento:
 				self.trv_implemento.selection_set(i)
 				self.trv_implemento.focus(i)
+				pass
 		self.velocidade.delete(0, tk.END)
 		self.profundidade.delete(0, tk.END)
 		self.condicaoSolo.delete(0, tk.END)
 		self.passada.delete(0, tk.END)
+		self.precoDiesel.delete(0, tk.END)
+		self.precoOleo.delete(0, tk.END)
+		self.precoTratorista.delete(0, tk.END)
 		self.item = self.trv_hist.item(self.trv_hist.focus())
 		self.velocidade.insert(0, self.item['values'][7])
 		self.profundidade.insert(0, self.item['values'][8])
 		self.condicaoSolo.set(self.item['values'][9])
 		self.passada.set(self.item['values'][10])
+		self.precoDiesel.insert(0, self.item['values'][11])
+		self.precoOleo.insert(0, self.item['values'][12])
+		self.precoTratorista.insert(0, self.item['values'][13])
 		self.simulate()
 
 	def submitDB(self):
@@ -349,10 +411,14 @@ class OperacaoPage():
 									 velocidade REAL,
 									 profundidade REAL,
 									 superficie TEXT,
-									 passada TEXT)""")
-		self.values_db = "INSERT INTO operacao(talhao, trator, implemento, nome_talhao, nome_trator, nome_implemento, velocidade, profundidade, superficie, passada) VALUES (?,?,?,?,?,?,?,?,?,?)" #Atribuindo a variavel a sintaxe SQLITE3
+									 passada TEXT,
+									 diesel REAL,
+									 oleo REAL,
+									 tratorista REAL)""")
+		self.values_db = "INSERT INTO operacao(talhao, trator, implemento, nome_talhao, nome_trator, nome_implemento, velocidade, profundidade, superficie, passada, diesel, oleo, tratorista) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)" #Atribuindo a variavel a sintaxe SQLITE3
 		self.c.execute(self.values_db, (self.idTalhao, self.idTrator, self.idImplemento, self.nomeTalhao, self.nomeTrator, self.nomeImplemento, \
-			self.velocidadeOperacao, self.profundidadeOperacao, self.soloOperacao, self.passadaOperacao)) #Inserindo os valores de entrada na tabela do banco de dados
+			self.velocidadeOperacao, self.profundidadeOperacao, self.soloOperacao, self.passadaOperacao, self.precoDiesel.get(), self.precoOleo.get(), \
+			self.precoTratorista.get())) #Inserindo os valores de entrada na tabela do banco de dados
 		self.conn.commit() #Commitando as alterações
 		self.conn.close() #Fechando a conexão
 		self.update_trv()
