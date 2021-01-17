@@ -215,8 +215,6 @@ class OperacaoPage():
 			self.parametersKey = self.parametersKey.replace("(","")
 			self.parametersList = parameters.Parametros.get(self.parametersKey)
 			self.parametersList = str(self.parametersList)
-			print(self.parametersKey)
-			print(self.parametersList)
 			self.parametersList = self.parametersList.split(',')
 			self.parametroA = float(self.parametersList[0].strip("[]()' "))
 			self.parametroB = float(self.parametersList[1].strip("[]()' "))

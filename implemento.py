@@ -93,8 +93,8 @@ class ImplementoPage:
 		self.trv_hist.heading(8, text="Juros")
 		self.trv_hist.heading(9, text="Seguro")
 		self.trv_hist.heading(10, text="Garagem")
-		self.trv_hist.heading(11, text="Horas Ano")
-		self.trv_hist.heading(12, text="Vida Util")
+		self.trv_hist.heading(11, text="Vida util")
+		self.trv_hist.heading(12, text="Hora ano")
 		self.trv_hist.column('1', width=20, minwidth=80)
 		self.trv_hist.column('2', width=40, minwidth=80)
 		self.trv_hist.column('3', width=40, minwidth=80)
@@ -139,7 +139,7 @@ class ImplementoPage:
 		if self.implemento.get() == '' or self.nome.get() == '':
 			messagebox.showerror(title=None, message="Favor preencha todos os campos!") 
 		elif self.implemento.get() == 'Arado de aivecas' or self.implemento.get() == 'Arado de discos' or self.implemento.get() == 'Grade de discos - ação dupla em X - Tandem' \
-			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de disco - ação simples':
+			 or self.implemento.get() == 'Grade de discos - ação dupla em V - Offset' or self.implemento.get() == 'Grade de discos - ação simples':
 			values_db = "INSERT INTO implemento(nome, tipo, larg, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), self.largura.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))

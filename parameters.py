@@ -41,8 +41,8 @@ Parametros = {
 Eficiencia = {
 				'Aradodeaivecas': [70, 90, 5, 10, 0.29, 1.8],
 				'Aradodediscos': [70, 90, 5, 10, 0.29, 1.8],	#OUTRA METODOLOGIA - MATERIAL DO PROFESSOR
-				'Subsoladorponteirasimples': [226, 0, 1.8, 1, 0.7, 0.45, 50],
-				'Subsoladorponteiracomasas': [294, 0, 2.4, 1, 0.7, 0.45, 50],
+				'Subsoladorponteirasimples': [70, 90, 4, 7],
+				'Subsoladorponteiracomasas': [70, 90, 4, 7],
 				'GradedediscosaçãoduplaemXTandemPrimeira': [70, 90, 6.5, 11, 0.18, 0.17],
 				'GradedediscosaçãoduplaemXTandemSegunda': [70, 90, 6.5, 11, 0.18, 0.17],
 				'GradedediscosaçãoduplaemVOffsetPrimeira': [70, 90, 6.5, 11, 0.18, 0.17],
