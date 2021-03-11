@@ -10,7 +10,7 @@ class ImplementoPage:
 
 		#GUI dos inputs
 		self.frame_inputs = tk.Frame(self.master)
-		self.implemento = tk.ttk.Combobox(self.frame_inputs, width=50, values=['',
+		self.implemento = tk.ttk.Combobox(self.frame_inputs, width=85, values=['',
 																	'Arado de aivecas',
 																	'Arado de discos',
 																	'Subsolador - ponteira simples',
@@ -20,22 +20,24 @@ class ImplementoPage:
 																	'Grade de discos - ação simples',
 																	'Cultivador de campo',
 																	'Sulcador',
-																	'Semeadora montada (sementes graúdas)',
-																	'Semeadora de arrasto (sementes graúdas)',
-																	'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)',
-																	'Semeadora montada (sementes miúdas)',
-																	'Semeadora de arrasto (sementes miúdas)'])
-		self.nome = tk.Entry(self.frame_inputs)
-		self.valorCompra = tk.Entry(self.frame_inputs)
-		self.valorJuro = tk.Entry(self.frame_inputs)
-		self.valorSeguro = tk.Entry(self.frame_inputs)
-		self.valorGaragem = tk.Entry(self.frame_inputs)
-		self.horaAno = tk.Entry(self.frame_inputs)
-		self.vidaUtil = tk.Entry(self.frame_inputs)
+																	'Semeadora (sementes graúdas) montada com canteiro preparado',
+																	'Semeadora (sementes graúdas) de arrasto com canteiro preparado',
+																	'Semeadora (sementes graúdas) de arrasto com canteiro preparado - adubadora - pulverizadora',
+																	'Semeadora (sementes graúdas) de arrasto sem canteiro preparado - adubadora - pulverizadora',
+																	'Semeadora (sementes miúdas) menor que 2 metros',
+																	'Semeadora (sementes miúdas) entre 2 e 4 metros',
+																	'Semeadora (sementes miúdas) maior que 4 metros'])
+		self.nome = tk.Entry(self.frame_inputs, width=58)
+		self.valorCompra = tk.Entry(self.frame_inputs, width=58)
+		self.valorJuro = tk.Entry(self.frame_inputs, width=58)
+		self.valorSeguro = tk.Entry(self.frame_inputs, width=58)
+		self.valorGaragem = tk.Entry(self.frame_inputs, width=58)
+		self.horaAno = tk.Entry(self.frame_inputs, width=58)
+		self.vidaUtil = tk.Entry(self.frame_inputs, width=58)
 		self.implementoLabel = tk.Label(self.frame_inputs, text='Tipo de Implemento:').grid(row=0, column=0)
 		self.nomeLabel = tk.Label(self.frame_inputs, text='Nome:').grid(row=1, column=0)
 		self.compralabel = tk.Label(self.frame_inputs, text = 'Valor de compra (R$): ').grid(row=4, column=0)
-		self.jurolabel = tk.Label(self.frame_inputs, text = 'Juros sobre o capital (%): ').grid(row=5, column=0)
+		self.jurolabel = tk.Label(self.frame_inputs, text = 'Juros anuais sobre o capital (%): ').grid(row=5, column=0)
 		self.segurolabel = tk.Label(self.frame_inputs, text = 'Taxa de seguro (%): ').grid(row=6, column=0)
 		self.garagemlabel = tk.Label(self.frame_inputs, text = 'Taxa de garagem (%): ').grid(row=7, column=0)
 		self.horaAnolabel = tk.Label(self.frame_inputs, text = 'Horas trabalhadas por ano: ').grid(row=8, column=0)
@@ -49,10 +51,10 @@ class ImplementoPage:
 		self.horaAno.grid(row=8, column=1)
 		self.vidaUtil.grid(row=9, column=1)
 		self.frame_inputs.grid()
-		self.distancia = tk.Entry(self.frame_inputs)
-		self.largura = tk.Entry(self.frame_inputs)
-		self.orgaos = tk.Entry(self.frame_inputs)
-		self.linhas = tk.Entry(self.frame_inputs)
+		self.distancia = tk.Entry(self.frame_inputs, width=58)
+		self.largura = tk.Entry(self.frame_inputs, width=58)
+		self.orgaos = tk.Entry(self.frame_inputs, width=58)
+		self.linhas = tk.Entry(self.frame_inputs, width=58)
 		self.linhasLabel = tk.Label(self.frame_inputs, text = 'Número de linhas:')		
 		self.larguraLabel = tk.Label(self.frame_inputs, text = 'Largura de operação (m):')
 		self.orgaosLabel = tk.Label(self.frame_inputs, text = 'Número de órgãos ativos:')
@@ -148,9 +150,10 @@ class ImplementoPage:
 			values_db = "INSERT INTO implemento(nome, tipo, larg, org, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get()))
-		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
-			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
+		elif self.implemento.get() == 'Sulcador' or self.implemento.get() == 'Semeadora (sementes graúdas) montada com canteiro preparado' or \
+			self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado' or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado - adubadora - pulverizadora' \
+			or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto sem canteiro preparado - adubadora - pulverizadora' or self.implemento.get() == 'Semeadora (sementes miúdas) menor que 2 metros' \
+			or self.implemento.get() == 'Semeadora (sementes miúdas) entre 2 e 4 metros' or self.implemento.get() == 'Semeadora (sementes miúdas) maior que 4 metros':
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "INSERT INTO implemento(nome, tipo, larg, linhas, compra, imposto, seg, gar, vu, hora) VALUES (?,?,?,?,?,?,?,?,?,?)"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.linhas.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
@@ -172,9 +175,10 @@ class ImplementoPage:
 			values_db = "UPDATE implemento SET nome=?, tipo=?, larg=?, org=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.orgaos.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
 					self.valorGaragem.get(), self.vidaUtil.get(), self.horaAno.get(), self.id))
-		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
-			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
+		elif self.implemento.get() == 'Sulcador' or self.implemento.get() == 'Semeadora (sementes graúdas) montada com canteiro preparado' or \
+			self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado' or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado - adubadora - pulverizadora' \
+			or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto sem canteiro preparado - adubadora - pulverizadora' or self.implemento.get() == 'Semeadora (sementes miúdas) menor que 2 metros' \
+			or self.implemento.get() == 'Semeadora (sementes miúdas) entre 2 e 4 metros' or self.implemento.get() == 'Semeadora (sementes miúdas) maior que 4 metros' :
 			mult = float(self.linhas.get()) * float(self.distancia.get())
 			values_db = "UPDATE implemento SET nome=?, tipo=?, larg=?, linhas=?, compra=?, imposto=?, seg=?, gar=?, vu=?, hora=? WHERE id=?"
 			c.execute(values_db, (self.nome.get(), self.implemento.get(), mult, self.linhas.get(), self.valorCompra.get(), self.valorJuro.get(), self.valorSeguro.get(), \
@@ -223,9 +227,10 @@ class ImplementoPage:
 			self.implemento_larg()
 		elif implemento == 'Subsolador - ponteira simples' or implemento == 'Subsolador - ponteira com asas' or implemento == 'Cultivador de campo':
 			self.implemento_orgaos()
-		elif self.implemento.get() == 'Encanteirador' or self.implemento.get() == 'Semeadora montada (sementes graúdas)' or \
-			self.implemento.get() == 'Semeadora de arrasto (sementes graúdas)' or self.implemento.get() == 'Semeadora de arrasto - adubadora - pulverizadora (sementes graúdas)' \
-			or self.implemento.get() == 'Semeadora montada (sementes miúdas)' or self.implemento.get() == 'Semeadora de arrasto (sementes miúdas)' :
+		elif self.implemento.get() == 'Sulcador' or self.implemento.get() == 'Semeadora (sementes graúdas) montada com canteiro preparado' or \
+			self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado' or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto com canteiro preparado - adubadora - pulverizadora' \
+			or self.implemento.get() == 'Semeadora (sementes graúdas) de arrasto sem canteiro preparado - adubadora - pulverizadora' or self.implemento.get() == 'Semeadora (sementes miúdas) menor que 2 metros' \
+			or self.implemento.get() == 'Semeadora (sementes miúdas) entre 2 e 4 metros' or self.implemento.get() == 'Semeadora (sementes miúdas) maior que 4 metros' :
 			self.implemento_linhas()
 		elif implemento == '':
 			self.cleaning()
@@ -294,8 +299,8 @@ class ImplementoPage:
 		self.valorJuro.insert(0, str(self.item['values'][7]))
 		self.valorSeguro.insert(0, str(self.item['values'][8]))
 		self.valorGaragem.insert(0, str(self.item['values'][9]))
-		self.horaAno.insert(0, str(self.item['values'][10]))
-		self.vidaUtil.insert(0, str(self.item['values'][11]))
+		self.horaAno.insert(0, str(self.item['values'][11]))
+		self.vidaUtil.insert(0, str(self.item['values'][10]))
 
 	def cleaning(self):
 		self.orgaos.grid_forget()

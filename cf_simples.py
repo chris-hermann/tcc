@@ -46,8 +46,26 @@ class CFPage:
 		self.comboLabel = tk.Label(self.frame_inputs, text='Selecione uma opção: ').grid(row=0, column=0)
 		
 
-
-		
+	def submitDB(self):
+		conn = sqlite3.connect('database.db') #Criando ou conectando ao banco de dados
+		c = conn.cursor() #Configurando o cursor para navegar no banco de dados
+		#Criando a tabela no banco de dados, se ela não existir, e seus respectivos campos
+		c.execute("""CREATE TABLE IF NOT EXISTS custo_fixo( 
+									 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+									 tipo TEXT NOT NULL,
+									 id_tipo INTEGER NOT NULL,
+									 depreciacao TEXT NOT NULL,
+									 juro REAL,
+									 seguro REAL,
+									 garagem REAL)""")
+		if self.combo == 'Tratores':
+			self.tipo = 'Trator'
+		elif self.combo == 'Implementos':
+			self.tipo = 'Implemento'
+		values_db = "INSERT INTO custo_fixo(tipo, id_tipo, depreciacao, juro, seguro, garagem) VALUES (?,?,?,?,?,?)" #Atribuindo a variavel a sintaxe SQLITE3
+		c.execute(values_db, (self.tipo, self.id, self.depreciacao, self.juro, self.seguro, self.garagem))
+		conn.commit() #Commitando as alterações
+		conn.close() #Fechando a conexão
 
 	def combo_action(self, eventObject):
 		self.trv_label.config(text='Selecione o trator ou implemento e clique no botão abaixo')
@@ -99,6 +117,7 @@ class CFPage:
 			self.vidaUtil = float(self.data[8].strip(' '))
 			self.horaAno = float(self.data[9].strip('[]() '))
 			self.calculate()
+			self.submitDB()
 		elif self.combo == 'Implementos':
 			conn = sqlite3.connect('database.db')
 			c = conn.cursor()
@@ -116,13 +135,14 @@ class CFPage:
 			self.vGaragem = float(self.data[9].strip(' '))
 			self.vidaUtil = float(self.data[10].strip(' '))
 			self.horaAno = float(self.data[11].strip("[]() '"))			
-			self.calculate()			
+			self.calculate()
+			self.submitDB()	
 
 	def calculate(self):
-		self.depreciacao = self.vCompra - (self.vCompra * 0.1)
-		self.juro = (self.vJuro / 100) * ((self.vCompra + (self.vCompra + 0.1)) / 2)
-		self.garagem = (self.vGaragem / 100) * self.vCompra
-		self.seguro = (self.vSeguro / 100) * self.vCompra
+		self.depreciacao = (self.vCompra - (self.vCompra * 0.1))/(self.vidaUtil * self.horaAno)
+		self.juro = ((self.vJuro / 100) * ((self.vCompra + (self.vCompra + 0.1))) / 2)/(self.vidaUtil * self.horaAno)
+		self.garagem = ((self.vGaragem / 100) * self.vCompra)/(self.vidaUtil * self.horaAno)
+		self.seguro = ((self.vSeguro / 100) * self.vCompra)/(self.vidaUtil * self.horaAno)
 		self.cfsimples_total = self.depreciacao + self.juro + self.garagem + self.seguro
 		self.cfsimples_hora = self.cfsimples_total / (self.vidaUtil * self.horaAno)
 		self.cf_totalLabel.config(text='O custo fixo total será de ' + str("%.3f" % self.cfsimples_total) + ' reais ao longo de toda a vida útil especificada.')

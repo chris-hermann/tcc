@@ -32,7 +32,7 @@ class OperacaoPage():
 		self.trv_implemento.heading(3, text='Tipo')
 		self.trv_trator.grid(row=1, column=1, padx=2, pady=3)
 		self.trv_implemento.grid(row=1, column=2, padx=3, pady=3)
-		self.trv_implemento.bind('<Double 1>', self.callback)
+		self.trv_implemento.bind('<ButtonRelease-1>', self.callback)
 		self.trv_implementoPop()
 		self.trv_tratorPop()
 		self.trv_talhaoPop()
@@ -56,7 +56,7 @@ class OperacaoPage():
 		self.simulateButton = tk.Button(self.frame_buttons, text='Simular operação', command=self.simulate)
 		self.simulateButton.grid(row=0, column=0, padx=3, pady=7)
 		self.quitButton = tk.Button(self.frame_buttons, text='Voltar', command=self.master.destroy)
-		self.submitButton = tk.Button(self.frame_buttons, text='Salvar simulação', command=self.submitDB)
+		self.submitButton = tk.Button(self.frame_buttons, text='Salvar simulação', command=self.submitDB, state=tk.DISABLED)
 		self.submitButton.grid(row=0, column=1, padx=2, pady=7)
 		self.quitButton.grid(row=0, column=2, padx=3, pady=7)
 		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
@@ -91,7 +91,6 @@ class OperacaoPage():
 		self.trv_hist.configure(xscrollcommand=self.hozscrlbar.set)
 		self.update_trv()
 	
-
 	def trv_tratorPop(self):
 		conn = sqlite3.connect('database.db')
 		c = conn.cursor()
@@ -177,7 +176,7 @@ class OperacaoPage():
 		self.texturaTalhao =  str(self.talhaoData[3].strip("[]()' "))
 		self.potenciaMotor = float(self.tratorData[2].strip())
 		self.transmissaoTrator = str(self.tratorData[3].strip("[]()' "))
-		self.transmissaoTrator =self.transmissaoTrator.replace(" ","")
+		self.transmissaoTrator = self.transmissaoTrator.replace(" ","")
 		self.tipoImplemento = str(self.implementoData[2].strip(" '"))
 		self.larguraImplemento = float(self.implementoData[3].strip(' '))
 		self.orgaosImplemento = self.implementoData[4].strip(' ')
@@ -201,8 +200,8 @@ class OperacaoPage():
 				self.parametroA = float(self.parametersList[4].strip("[]()' "))
 				self.parametroB = float(self.parametersList[5].strip("[]()' "))
 			elif self.texturaTalhao == 'Média':
-				self.parametroA = float(self.parametersList[4].strip("[]()' "))
-				self.parametroB = float(self.parametersList[5].strip("[]()' "))
+				self.parametroA = float(self.parametersList[2].strip("[]()' "))
+				self.parametroB = float(self.parametersList[3].strip("[]()' "))
 			else:
 				self.parametroA = float(self.parametersList[0].strip("[]()' "))
 				self.parametroB = float(self.parametersList[1].strip("[]()' "))
@@ -224,15 +223,38 @@ class OperacaoPage():
 			self.forca_requerida_op = self.forca_requerida(self.parametroA, self.parametroB, self.parametroC, self.parametroF, \
 															self.velocidadeOperacao, self.profundidadeOperacao, self.larguraImplemento, \
 															self.orgaosImplemento, self.linhasImplemento)
+		self.potencia_disp_tdp = (self.potenciaMotor * 0.83) * 0.735499
 		self.potencia_req_bt = (self.forca_requerida_op * self.velocidadeOperacao) / 3.6
 		self.potencia_req_tdp = self.potencia_req_bt / self.coefTransmissao
-		self.potencia_disp_tdp = (self.potenciaMotor * 0.83) * 0.735499
-		self.messageValue = self.teste_tracao(self.potencia_req_tdp, self.potencia_disp_tdp)
-		if self.messageValue == 'ok':
-			return
+		self.TesteResult1 = self.teste_tracao(self.potencia_req_tdp, self.potencia_disp_tdp, self.rangeAcuracia)
+		if self.TesteResult1 == True:
+			pass
+		if self.TesteResult1 == False:
+			self.RetornoMensagem = messagebox.askretrycancel(title="Erro", message="O trator não tem potência suficiente para tracionar o implemento nestas condições. \n\n" \
+				+ "Potência disponível na TDP: " + str("%.2f" % self.potencia_disp_tdp) + "\n" + "Potência requerida na TDP: " + str("%2.f" % self.potencia_req_tdp) + "\n\n" \
+				+ "É necessário compabitilizar o trator ou o implemento, alguns métodos são: \n" \
+				+ "  - Redimensionar o implemento utilizado, diminuindo sua largura de trabalho. \n" \
+				+ "  - Reduzir a velocidade e profundidade de operação. \n" \
+				+ "  - Utilizar um trator mais potente. \n\n" \
+				+ "Todas as estimativas possuem uma variação esperada, você gostaria de tentar resimular?")
+			if self.RetornoMensagem == True:
+				self.forca_requerida_op = self.forca_requerida_op - (self.forca_requerida_op * (self.rangeAcuracia/100))
+				self.potencia_req_bt = (self.forca_requerida_op * self.velocidadeOperacao) / 3.6
+				self.potencia_req_tdp = self.potencia_req_bt / self.coefTransmissao
+				self.TesteResult2 = self.teste_tracao(self.potencia_req_tdp, self.potencia_disp_tdp, self.rangeAcuracia)
+				if self.TesteResult2 == True:
+					pass
+				if self.TesteResult2 == False:
+					messagebox.showerror(title='Erro', message='O trator não traciona o implemento mesmo considerando o cenário mais baixo de força requerida pelo implemento. ' \
+						+ 'Por favor, redimensione o implemento. \n'\
+						+ 'Caso você realizou essa operação em campo com sucesso, entre em contato conosco.')
+					print(self.potencia_req_tdp)
+			if self.RetornoMensagem == False:
+				self.master.focus_force()
+				return	
+			
 		self.fatorX = self.potencia_req_tdp / self.potencia_disp_tdp
-		self.raiz = 738 * self.fatorX + 173
-		self.consumoCombEspecifico = 2.64 * self.fatorX + 3.91 - 0.203 * math.sqrt(self.raiz)
+		self.consumoCombEspecifico = self.CalcularConsumoEspecifico(self.fatorX)
 		self.consumoCombHora = self.consumoCombEspecifico * self.potencia_req_tdp
 		self.consumoOleoHora = 0.000566 * (self.potenciaMotor * 0.735499) + 0.02487
 		self.eficiencia_campo = self.n_campo(self.parametersKey, self.velocidadeOperacao)
@@ -242,9 +264,39 @@ class OperacaoPage():
 		self.custoCombustivel = self.consumoCombHora * float(self.precoDiesel.get())
 		self.custoOleo = self.consumoOleoHora * float(self.precoOleo.get())
 		self.custoTratorista = float(self.precoTratorista.get())
-		self.custoVariavel = self.custoCombustivel + self.custoOleo + self.custoTratorista
+		self.trTrator = self.transmissaoTrator[2]
+		self.custoManutencao = self.maintenace(self.trTrator)
+		self.custoVariavel = self.custoCombustivel + self.custoOleo + self.custoTratorista + self.custoManutencao
+		self.submitButton.config(state=tk.ACTIVE)
+		self.CustoFixoTrator()
+		self.CustoFixoImplemento()
+		self.CustoTotalHorario = self.CustoFixoT + self.CustoFixoImp + self.custoVariavel
+		self.CustoTotalHectare = self.CustoTotalHorario/self.capCampoEfetiva
+		self.CustoTotal = self.CustoTotalHorario * self.horasTrabalhadas
 		self.print_results()
-		
+
+	def CalcularConsumoEspecifico(self,eficiencia_tratoria):
+		if eficiencia_tratoria > 0.856:
+			self.consumo = 0.411
+		else:
+			self.raiz = 738 * self.fatorX + 173
+			self.consumo = 2.64 * self.fatorX + 3.91 - 0.203 * math.sqrt(self.raiz)
+		return self.consumo
+
+	def maintenace(self, tr):
+		if tr == '2':
+			self.RF1 = 0.007
+			self.RF2 = 2
+		elif tr == '4': 
+			self.RF1 = 0.003
+			self.RF2 = 2
+		if self.tratorData[3] != '':
+			self.precoTrator = float(self.tratorData[4].strip("[]()' "))
+			self.horaAno = float(self.tratorData[9].strip("[]()' "))
+			self.vidaUtil = float(self.tratorData[8].strip("[]()' "))
+		self.manutencaoHora = ((self.RF1*math.pow(self.vidaUtil*self.horaAno/1000,2))*self.precoTrator)/(self.horaAno * self.vidaUtil)
+		return self.manutencaoHora
+
 	def searchDB(self, id, table):
 		self.conn = sqlite3.connect('database.db')
 		self.c = self.conn.cursor()
@@ -293,54 +345,127 @@ class OperacaoPage():
 	def print_results(self):
 		self.outputsPage = tk.Toplevel(self.master)
 		self.app = outputs.OutputsPage(self.outputsPage)
-		self.app.areaLabel.config(text='Área do talhão (ha): ' + str("%.2f" % self.areaTalhao))
-		self.app.texturaLabel.config(text='Textura do solo: ' + str(self.texturaTalhao))
-		self.app.transmissaoLabel.config(text='Tipo de transmissão: ' + str(self.transmissaoTrator))
-		self.app.potenciaLabel.config(text='Potência nominal (cv): ' + str(self.potenciaMotor))
-		self.app.implementoLabel.config(text= 'Tipo de implemento: ' + str(self.tipoImplemento))
-		self.app.larguraLabel.config(text= 'Largura de operação (m): ' + str(self.larguraImplemento))
-		self.app.orgaoLabel.config(text= 'Número de órgãos ativos: ' + str(self.orgaosImplemento))
-		self.app.linhasLabel.config(text= 'Número de linhas: ' + str(self.linhasImplemento))
-		self.app.velLabel.config(text= 'Velocidade da operação (km/h): ' + str(self.velocidadeOperacao))
-		self.app.profLabel.config(text= 'Profundidade da operação (cm): ' + str(self.profundidadeOperacao))
-		self.app.passadaLabel.config(text= 'Número da passada: ' + str(self.passadaOperacao))
-		self.app.condSoloLabel.config(text= 'Superfície do solo:' + str(self.soloOperacao))
-		self.app.coefTransLabel.config(text= 'Coeficiente de transmissão: ' + str(self.coefTransmissao))
+		self.app.IDTalhao = self.idTalhao
+		self.app.NomeTalhao = self.nomeTalhao
+		self.app.NomeTalhaoVar.set(self.nomeTalhao)
+		self.app.AreaTalhao = self.areaTalhao
+		self.app.AreaTalhaoVar.set(self.areaTalhao)
+		self.app.TexturaTalhao = self.texturaTalhao
+		self.app.TexturaTalhaoVar.set(self.texturaTalhao)
+		self.app.IDTrator = self.idTrator
+		self.app.NomeTrator = self.nomeTrator
+		self.app.NomeTratorVar.set(self.nomeTrator)
+		self.app.TransmissaoTrator = self.transmissaoTrator
+		self.app.TransmissaoTratorVar.set(self.transmissaoTrator)
+		self.app.PotenciaTrator = self.potenciaMotor
+		self.app.PotenciaTratorVar.set(self.potenciaMotor)
+		self.app.IDImplemento = self.idImplemento
+		self.app.NomeImplemento = self.nomeImplemento
+		self.app.NomeImplementoVar.set(self.nomeImplemento)
+		self.app.TipoImplemento = self.tipoImplemento
+		self.app.TipoImplementoVar.set(self.tipoImplemento)
+		self.app.LarguraImplemento = self.larguraImplemento
+		self.app.LarguraImplementoVar.set(self.larguraImplemento)
+		self.app.OrgaoImplemento = self.orgaosImplemento
+		self.app.OrgaoImplementoVar.set(self.orgaosImplemento)
+		self.app.LinhaImplemento = self.linhasImplemento
+		self.app.LinhaImplementoVar.set(self.linhasImplemento)
+		self.app.VelocidadeOperacao = self.velocidadeOperacao
+		self.app.VelocidadeOperacaoVar.set(self.velocidadeOperacao)
+		self.app.ProfundidadeOperacao = self.profundidadeOperacao
+		self.app.ProfundidadeOperacaoVar.set(self.profundidadeOperacao)
+		self.app.PassadaOperacao = self.passadaOperacao
+		self.app.PassadaOperacaoVar.set(self.passadaOperacao)
+		self.app.CondicaoSolo = str(self.condicaoSolo.get())
+		self.app.CondicaoSoloVar.set(str(self.condicaoSolo.get()))
+		self.app.PrecoCombustivel = float(self.precoDiesel.get())
+		self.app.PrecoCombustivelVar.set(float(self.precoDiesel.get()))
+		self.app.PrecoOleo = float(self.precoOleo.get())
+		self.app.PrecoOleoVar.set(float(self.precoOleo.get()))
+		self.app.PrecoTratorista = float(self.precoTratorista.get())
+		self.app.PrecoTratoristaVar.set(float(self.precoTratorista.get()))
+		self.app.EficienciaCampo = self.eficiencia_campo
+		self.app.EficienciaCampoVar.set(str("%.2f" % self.eficiencia_campo))
+		self.app.CapacidadeCampoTeorica = self.capCampoTeorica
+		self.app.CapacidadeCampoTeoricaVar.set(str("%.2f" % self.capCampoTeorica))
+		self.app.CapacidadeCampoEfetiva = self.capCampoEfetiva
+		self.app.CapacidadeCampoEfetivaVar.set(str("%.2f" % self.capCampoEfetiva))
+		self.app.TempoGasto = self.horasTrabalhadas
+		self.app.TempoGastoVar.set(str("%.2f" % self.horasTrabalhadas))
+		self.app.ConsumoCombEspec =self.consumoCombEspecifico
+		self.app.ConsumoCombEspecVar.set(str("%.4f" % self.consumoCombEspecifico))
+		self.app.ConsumoCombHora = self.consumoCombHora
+		self.app.ConsumoCombHoraVar.set(str("%.4f" % self.consumoCombHora))
+		self.app.DepreciacaoTrator = self.DepreciacaoTrator
+		self.app.DepreciacaoTratorVar.set(str("%.2f" % self.DepreciacaoTrator))
+		self.app.JuroTrator = self.JurosTrator
+		self.app.JuroTratorVar.set(str("%.2f" % self.JurosTrator))
+		self.app.GaragemTrator = self.GaragemTrator
+		self.app.GaragemTratorVar.set(str("%.2f" % self.GaragemTrator))
+		self.app.SeguroTrator = self.SeguroTrator
+		self.app.SeguroTratorVar.set(str("%.2f" % self.SeguroTrator))
+		self.app.CustoFixoTrator = self.CustoFixoT
+		self.app.CustoFixoTratorVar.set(str("%.2f" % self.CustoFixoT))
+		self.app.DepreciacaoImplemento = self.DepreciacaoImplemento
+		self.app.DepreciacaoImplementoVar.set(str("%.2f" % self.DepreciacaoImplemento))
+		self.app.JuroImplemento = self.JurosImplemento
+		self.app.JuroImplementoVar.set(str("%.2f" % self.JurosImplemento))
+		self.app.GaragemImplemento = self.GaragemImplemento
+		self.app.GaragemImplementoVar.set(str("%.2f" % self.GaragemImplemento))
+		self.app.SeguroImplemento = self.SeguroImplemento
+		self.app.SeguroImplementoVar.set(str("%.2f" % self.SeguroImplemento))
+		self.app.CustoFixoImplemento = self.CustoFixoImp
+		self.app.CustoFixoImplementoVar.set(str("%.2f" % self.CustoFixoImp))
+		self.app.CustoCombHora = self.custoCombustivel
+		self.app.CustoCombHoraVar.set(str("%.2f" % self.custoCombustivel))
+		self.app.CustoOleoHora = self.custoOleo
+		self.app.CustoOleoHoraVar.set(str("%.2f" % self.custoOleo))
+		self.app.CustoManutencaoHoraTrator = self.custoManutencao
+		self.app.CustoManutencaoHoraTratorVar.set(str("%.2f" % self.custoManutencao))
+		self.app.CustoOperacional = self.custoVariavel
+		self.app.CustoOperacionalVar.set(str("%.2f" % self.custoVariavel))
+		self.app.CustoTotalHorario = self.CustoTotalHorario
+		self.app.CustoTotalHorarioVar.set(str("%.2f" % self.CustoTotalHorario))
+		self.app.CustoTotalHectare = self.CustoTotalHectare
+		self.app.CustoTotalHectareVar.set(str("%.2f" % self.CustoTotalHectare))
+		self.app.CustoTotal = self.CustoTotal
+		self.app.CustoTotalVar.set(str("%.2f" % self.CustoTotal))
+		self.app.CoeficienteTransmissao = self.coefTransmissao
 		if self.tipoImplemento == 'Arado de discos':
-			self.app.parCLabel.config(text= 'Parâmetro C: None')
-			self.app.parFLabel.config(text= 'Parâmetro F: None')
-			self.app.rangeLabel.config(text= 'Variação esperada -+ (%): None')
+			self.app.ParametroC = 0.0
+			self.app.ParametroF = 0.0
 		else:
-			self.app.parCLabel.config(text= 'Parâmetro C: ' + str(self.parametroC))
-			self.app.parFLabel.config(text= 'Parâmetro F: ' + str(self.parametroF))
-			self.app.rangeLabel.config(text= 'Variação esperada -+ (%): ' + str(self.rangeAcuracia))
-		self.app.parALabel.config(text= 'Parâmetro A: ' + str(self.parametroA))
-		self.app.parBLabel.config(text= 'Parâmetro B: ' + str(self.parametroB))
-		self.app.forcareqLabel.config(text= 'Força requerida na operação (kN): ' + str("%.2f" % self.forca_requerida_op))
-		self.app.potreqBTLabel.config(text= 'Potência requerida na Barra de Tração (kW): ' + str("%.2f" % self.potencia_req_bt))
-		self.app.potreqTDPLabel.config(text= 'Potência requerida na Tomada de Potência (kW): ' + str("%.2f" % self.potencia_req_tdp))
-		self.app.potdispTDPLabel.config(text= 'Potência disponível na Tomada de Potência (kW): ' + str("%.2f" % self.potencia_disp_tdp))
-		self.app.fatorxLabel.config(text= 'Fator X: ' + str(self.fatorX))
-		self.app.combEspLabel.config(text= 'Consumo de combustível específico (L/kWh): ' + str("%.2f" % self.consumoCombEspecifico))
-		self.app.combHoraLabel.config(text= 'Consumo de combustível por hora (L/h): ' + str("%.2f" % self.consumoCombHora))
-		self.app.eficCampoLabel.config(text= 'Eficiência de campo (decimal): ' + str("%.2f" % self.eficiencia_campo))
-		self.app.capCampoTLabel.config(text= 'Capacidade de campo teórica (ha/h): ' + str("%.2f" % self.capCampoTeorica))
-		self.app.capCampoELabel.config(text= 'Capacidade de campo efetiva (ha/h): ' + str("%.2f" % self.capCampoEfetiva))
-		self.app.tempoLabel.config(text= 'Tempo total de operação (horas): ' + str("%.2f" % self.horasTrabalhadas))
-		self.app.custoCombustivel.config(text='Custo de combustivel por hora (R$/h): ' + str("%.2f" % self.custoCombustivel))
-		self.app.custoOleo.config(text='Custo de óleo por hora (R$/h): ' + str("%.2f" % self.custoOleo))
-		self.app.custoTratorista.config(text='Custo de tratorista por hora (R$/h): ' + str("%.2f" % self.custoTratorista))
-		self.app.custoVariavel.config(text='Custo variavel por hora (R$/h): ' + str("%.2f" % self.custoVariavel))
+			self.app.ParametroC = self.parametroC
+			self.app.ParametroF = self.parametroF
+		self.app.ParametroA = self.parametroA
+		self.app.ParametroB =  self.parametroB
+		self.app.ForcaReqImplemento = self.forca_requerida_op
+		self.app.PotenciaReqImplementoBT = self.potencia_req_bt
+		self.app.PotenciaReqImplementoTDP = self.potencia_req_tdp
+		self.app.PotenciaDispTratorTDP = self.potencia_disp_tdp
+		self.app.FatorX = self.fatorX
+		self.app.ValorCompraTrator = self.ValorCompraTrator
+		self.app.TaxaJurosTrator = self.ValorJuroTrator
+		self.app.TaxaGaragemTrator = self.ValorGaragemTrator
+		self.app.TaxaSeguroTrator = self.ValorSeguroTrator
+		self.app.VidaUtilHoraTrator = self.VidaUtilTrator * self.HoraAnoTrator
+		self.app.ValorCompraImplemento = self.ValorCompraImplemento
+		self.app.TaxaJurosImplemento = self.ValorJuroImplemento
+		self.app.TaxaGaragemImplemento = self.ValorGaragemImplemento
+		self.app.TaxaSeguroImplemento = self.ValorSeguroImplemento
+		self.app.VidaUtilHoraImplemento = self.VidaUtilImplemento * self.HoraAnoImplemento
+		self.app.EficienciaCampoMinima = self.nmin
+		self.app.EficienciaCampoMaxima = self.nmax
 
-	def teste_tracao(self, pot_req, pot_disp):
-		pot_req += (0.1 * pot_req)
-		if pot_req >= pot_disp:
-			self.teste = messagebox.showerror(title=None, message="O trator não tem potência suficiente para tracionar este implemento nestas condições. \
-				É necessário mudar o trator ou implemento, ou ainda diminuir a velocidade ou profundidade de operação. A potência disponível \
-				na TDP é " + str("%.3f" % pot_disp) + ". Enquanto a potência requerida pela operação é " + str("%.3f" % pot_req))
-			return self.teste
+		
+
+	def teste_tracao(self, pot_req, pot_disp, variacao):
+		
+		safe_pot_req = pot_req + (0.1 * pot_req)
+		if safe_pot_req >= pot_disp:
+			return False
 		else:
-			pass
+			return True
 
 	def update_trv(self):
 		conn = sqlite3.connect('database.db')
@@ -359,7 +484,6 @@ class OperacaoPage():
 		self.id_talhao = self.trv_selection['values'][1]
 		self.id_trator = self.trv_selection['values'][2]
 		self.id_implemento = self.trv_selection['values'][3]
-		print(self.id_implemento)
 		for i in self.trv_trator.get_children():
 			self.id_trv_trator = self.trv_trator.item(i)['values'][0]
 			if self.id_trv_trator == self.id_trator:
@@ -420,3 +544,63 @@ class OperacaoPage():
 		self.conn.commit() #Commitando as alterações
 		self.conn.close() #Fechando a conexão
 		self.update_trv()
+
+	def CustoFixoTrator(self):
+		self.conn = sqlite3.connect('database.db')
+		self.c = self.conn.cursor()
+		self.c.execute("SELECT * FROM trator WHERE id LIKE '%"+str(self.idTrator)+"%'")
+		self.data = self.c.fetchall()
+		self.data = str(self.data)
+		self.data = self.data.split(',')
+		self.ValorCompraTrator = float(self.data[4].strip(' '))
+		self.ValorJuroTrator = float(self.data[5].strip(' '))
+		self.ValorSeguroTrator = float(self.data[6].strip(' '))
+		self.ValorGaragemTrator = float(self.data[7].strip(' '))
+		self.VidaUtilTrator = float(self.data[8].strip(' '))
+		self.HoraAnoTrator = float(self.data[9].strip("[]() '"))
+		self.DepreciacaoTrator = (self.ValorCompraTrator - (self.ValorCompraTrator * 0.1))/(self.VidaUtilTrator * self.HoraAnoTrator)
+		self.Ano=1
+		self.ValorInicial = self.ValorCompraTrator
+		self.JuroTotal = 0
+		while self.Ano<=self.VidaUtilTrator:
+			self.ValorFinal = self.ValorInicial-((self.DepreciacaoTrator*self.HoraAnoTrator))
+			self.JuroAnual = ((self.ValorInicial+self.ValorFinal)/2) * (self.ValorJuroTrator/100)
+			self.JuroTotal = self.JuroTotal + self.JuroAnual
+			self.ValorInicial = self.ValorFinal
+			self.Ano = self.Ano + 1
+		self.JurosTrator = self.JuroTotal/(self.VidaUtilTrator*self.HoraAnoTrator)
+		self.GaragemTrator = ((self.ValorGaragemTrator / 100) * self.ValorCompraTrator)/(self.VidaUtilTrator * self.HoraAnoTrator)
+		self.SeguroTrator = ((self.ValorSeguroTrator / 100) * self.ValorCompraTrator)/(self.VidaUtilTrator * self.HoraAnoTrator)
+		self.CustoFixoT = self.DepreciacaoTrator + self.JurosTrator + self.GaragemTrator + self.SeguroTrator
+		self.conn.commit()
+		self.conn.close()
+
+	def CustoFixoImplemento(self):
+		self.conn = sqlite3.connect('database.db')
+		self.c = self.conn.cursor()
+		self.c.execute("SELECT * FROM implemento WHERE id LIKE '%"+str(self.idImplemento)+"%'")
+		self.data = self.c.fetchall()
+		self.data = str(self.data)
+		self.data = self.data.split(',')
+		self.ValorCompraImplemento = float(self.data[6].strip(' '))
+		self.ValorJuroImplemento = float(self.data[7].strip(' '))
+		self.ValorSeguroImplemento = float(self.data[8].strip(' '))
+		self.ValorGaragemImplemento = float(self.data[9].strip(' '))
+		self.VidaUtilImplemento = float(self.data[10].strip(' '))
+		self.HoraAnoImplemento = float(self.data[11].strip("[]() '"))
+		self.DepreciacaoImplemento = (self.ValorCompraImplemento - (self.ValorCompraImplemento * 0.1))/(self.VidaUtilImplemento * self.HoraAnoImplemento)
+		self.Ano = 1
+		self.ValorInicial = self.ValorCompraImplemento
+		self.JuroTotal = 0
+		while self.Ano<=self.VidaUtilImplemento:
+			self.ValorFinal = self.ValorInicial-((self.DepreciacaoImplemento*self.HoraAnoImplemento))
+			self.JuroAnual = ((self.ValorInicial+self.ValorFinal)/2) * (self.ValorJuroImplemento/100)
+			self.JuroTotal = self.JuroTotal + self.JuroAnual
+			self.ValorInicial = self.ValorFinal
+			self.Ano = self.Ano + 1
+		self.JurosImplemento = self.JuroTotal/(self.VidaUtilImplemento*self.HoraAnoImplemento)
+		self.GaragemImplemento = ((self.ValorGaragemImplemento / 100) * self.ValorCompraImplemento)/(self.VidaUtilImplemento * self.HoraAnoImplemento)
+		self.SeguroImplemento = ((self.ValorSeguroImplemento / 100) * self.ValorCompraImplemento)/(self.VidaUtilImplemento * self.HoraAnoImplemento)
+		self.CustoFixoImp = self.DepreciacaoImplemento + self.JurosImplemento + self.GaragemImplemento + self.SeguroImplemento
+		self.conn.commit()
+		self.conn.close()

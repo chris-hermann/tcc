@@ -71,7 +71,7 @@ class TratorPage:
 		self.trv_hist.heading(3, text="Potência (cv)")
 		self.trv_hist.heading(4, text="Transmissão")
 		self.trv_hist.heading(5, text="Valor de compra (R$)")
-		self.trv_hist.heading(6, text="Juros (%)")
+		self.trv_hist.heading(6, text="Juros anuais sobre o capital (%)")
 		self.trv_hist.heading(7, text="Seguro (%)")
 		self.trv_hist.heading(8, text="Garagem (%)")
 		self.trv_hist.heading(9, text="Vida útil (anos)")
