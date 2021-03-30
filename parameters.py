@@ -19,7 +19,7 @@ relacaoTransmissao = {'4x2Firme': 0.72,
 
 Parametros = {
 				'Aradodeaivecas': [652, 0, 5.1, 1, 0.7, 0.45, 40],
-				'Aradodediscos': [2.4, 0.045, 3.8, 0.042, 5.2, 0.039],     #OUTRA METODOLOGIA - MATERIAL DO PROFESSOR
+				'Aradodediscos': [2.4, 0.045, 3.8, 0.042, 5.2, 0.039, 40],     #OUTRA METODOLOGIA - MATERIAL DO PROFESSOR
 				'Subsoladorponteirasimples': [226, 0, 1.8, 1, 0.7, 0.45, 50],
 				'Subsoladorponteiracomasas': [294, 0, 2.4, 1, 0.7, 0.45, 50],
 				'GradedediscosaçãoduplaemXTandemPrimeira': [309, 16, 0, 1, 0.88, 0.78, 50],

@@ -7,13 +7,16 @@ class OperacaoPage():
 	def __init__(self, master):
 		self.master = master
 		self.master.title('Simulação de operação agrícola')
+		self.master.iconbitmap('icon.ico')
+		self.master.resizable(False, False)
 		self.frame_inputs = tk.Frame(self.master)
 		self.frame_buttons = tk.Frame(self.master)
 		self.frame_hist = tk.Frame(self.master)
 		self.frame_inputs.grid()
 		self.frame_buttons.grid()
 		self.frame_hist.grid()
-		self.trv_implemento_label = tk.Label(self.frame_inputs, text='Dê um clique duplo no implemento que deseja simular a operação').grid(row=0, column=2)
+		self.spaceLabel3 = tk.Label(self.frame_inputs, text = "    ").grid()
+		self.trv_implemento_label = tk.Label(self.frame_inputs, text='Selecione um talhão, trator e implemento abaixo').grid(row=0, column=0, columnspan=3)
 		self.trv_trator = tk.ttk.Treeview(self.frame_inputs, columns=(1,2,3), show="headings", height='3', selectmode='browse', displaycolumns=('2','3'))
 		self.trv_talhao = tk.ttk.Treeview(self.frame_inputs, columns=(1,2,3), show="headings", height='3', selectmode='browse', displaycolumns=('2','3'))
 		self.trv_implemento = tk.ttk.Treeview(self.frame_inputs, columns=(1,2,3), show="headings", height='3', selectmode='browse', displaycolumns=('2','3'))
@@ -62,7 +65,7 @@ class OperacaoPage():
 		self.titlefont = tkFont.Font(family='Helvetica', size=22, weight='bold')
 		self.spacerLabel2 = tk.Label(self.frame_buttons).grid(row=1)
 		self.trvLabel = tk.Label(self.frame_hist, text='Histórico', font=self.titlefont, anchor = tk.W).grid()
-		self.trvHelper = tk.Label(self.frame_hist, text='Dê um clique duplo em algum item do histórico para visualizar o resultado da simulação').grid()
+		self.trvHelper = tk.Label(self.frame_hist, text='Dê um clique duplo em algum item do histórico para editar os valores de entrada').grid()
 		self.trv_hist = tk.ttk.Treeview(self.frame_hist, columns=(1,2,3,4,5,6,7,8,9,10,11,12,13,14), show='headings', height='3', selectmode='browse', displaycolumns=('5','6','7','8','9','10','11','12','13','14'))
 		self.trv_hist.heading(5, text='Nome do talhão')
 		self.trv_hist.heading(6, text='Nome do trator')
@@ -196,6 +199,7 @@ class OperacaoPage():
 			self.parametersList = parameters.Parametros.get(self.parametersKey)
 			self.parametersList = str(self.parametersList)
 			self.parametersList = self.parametersList.split(',')
+			self.rangeAcuracia = float(self.parametersList[6].strip("[]()' "))
 			if self.texturaTalhao == 'Argilosa':
 				self.parametroA = float(self.parametersList[4].strip("[]()' "))
 				self.parametroB = float(self.parametersList[5].strip("[]()' "))
@@ -232,10 +236,6 @@ class OperacaoPage():
 		if self.TesteResult1 == False:
 			self.RetornoMensagem = messagebox.askretrycancel(title="Erro", message="O trator não tem potência suficiente para tracionar o implemento nestas condições. \n\n" \
 				+ "Potência disponível na TDP: " + str("%.2f" % self.potencia_disp_tdp) + "\n" + "Potência requerida na TDP: " + str("%2.f" % self.potencia_req_tdp) + "\n\n" \
-				+ "É necessário compabitilizar o trator ou o implemento, alguns métodos são: \n" \
-				+ "  - Redimensionar o implemento utilizado, diminuindo sua largura de trabalho. \n" \
-				+ "  - Reduzir a velocidade e profundidade de operação. \n" \
-				+ "  - Utilizar um trator mais potente. \n\n" \
 				+ "Todas as estimativas possuem uma variação esperada, você gostaria de tentar resimular?")
 			if self.RetornoMensagem == True:
 				self.forca_requerida_op = self.forca_requerida_op - (self.forca_requerida_op * (self.rangeAcuracia/100))
@@ -246,9 +246,12 @@ class OperacaoPage():
 					pass
 				if self.TesteResult2 == False:
 					messagebox.showerror(title='Erro', message='O trator não traciona o implemento mesmo considerando o cenário mais baixo de força requerida pelo implemento. ' \
-						+ 'Por favor, redimensione o implemento. \n'\
+						+ "\n\nÉ necessário compabitilizar o trator ou o implemento, alguns métodos são: \n\n" \
+						+ "  - Redimensionar o implemento utilizado, diminuindo sua largura de trabalho. \n" \
+						+ "  - Reduzir a velocidade e profundidade de operação. \n" \
+						+ "  - Utilizar um trator mais potente. \n\n" \
 						+ 'Caso você realizou essa operação em campo com sucesso, entre em contato conosco.')
-					print(self.potencia_req_tdp)
+					return
 			if self.RetornoMensagem == False:
 				self.master.focus_force()
 				return	

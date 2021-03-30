@@ -4,13 +4,23 @@ import sqlite3, re, parameters, math, operacao
 import tkinter.font as tkFont
 from datetime import date
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 from reportlab.lib.colors import Color, gray, green, blue, red, yellow
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import renderPDF
+from reportlab.lib.formatters import DecimalFormatter
+import os
+
 
 
 class OutputsPage():
 	def __init__(self, master):
 		self.master = master
 		self.master.title('Resultado da simulação')
+		self.master.iconbitmap('icon.ico')
+		self.master.resizable(False, False)
 		self.FonteTitulo = tkFont.Font(family='Helvetica', size=10, weight='bold')
 		self.frame_inputs = tk.LabelFrame(self.master, text='Dados de Entrada', font=self.FonteTitulo)
 		self.frame_inputsTrator = tk.LabelFrame(self.frame_inputs, text='Trator')
@@ -289,14 +299,15 @@ class OutputsPage():
 		self.submitButton = tk.Button(self.frame_buttons, text='Salvar simulação', command=self.submitDB)
 		self.submitButton.grid(row=0, column=1)
 
-
-
 	def GeneratePDF(self):
+		dirname = os.path.dirname(__file__)
+		final_dirname = dirname[:-16]
+		filename = os.path.join(final_dirname, 'Relatorios\\')
 		gray50transparent = Color(0.3,0.3,0.3, alpha=0.3)
 		DataHoje = date.today()
 		DataHojeString = DataHoje.strftime('%d%m%Y')
 		NomePDF = DataHojeString + '_' + str(self.NomeImplemento) + str(self.NomeTalhao)
-		pdf = canvas.Canvas('{}.pdf'.format(NomePDF))
+		pdf = canvas.Canvas(filename + '{}.pdf'.format(NomePDF))
 		pdf.setTitle(NomePDF)
 		pdf.setFont('Helvetica-Bold', 16)
 		pdf.drawString(150, 810, 'RELATÓRIO DETALHADO DE SIMULAÇÃO')
@@ -354,6 +365,9 @@ class OutputsPage():
 		pdf.rect(5, 494, 175, 20, stroke=True, fill=True) #TITULO CUSTO FIXOS
 		pdf.rect(200, 494, 175, 20, stroke=True, fill=True) #TITULO CUSTOS OPERACIONAIS
 		pdf.rect(200, 345, 390, 20, stroke=True, fill=True) #TITULO CUSTOS TOTAIS
+		pdf.rect(5, 243, 180, 20, stroke=True, fill=True)  #TITULO GRAFICO CF TRATOR
+		pdf.rect(200, 243, 180, 20, stroke=True, fill=True)  #TITULO GRAFICO CF IMPLEMENTO
+		pdf.rect(400, 243, 180, 20, stroke=True, fill=True)  #TITULO GRAFICO CV
 		pdf.line(197, 760, 197, 555) #LINHA ENTRE TRATOR E TALHAO
 		pdf.line(15, 650, 193, 650) #LINHA ENTRE TRATOR E OPERACAO
 		pdf.line(201, 700, 402, 700) #LINHA ENTRE TALHAO E IMPLEMENTO
@@ -434,8 +448,23 @@ class OutputsPage():
 		pdf.drawString(260, x, 'Custo horário da operação (R$/h): {}'.format(str("%.2f" % self.CustoTotalHorario)))
 		pdf.drawString(260, x-10, 'Custo hectare da operação (R$/ha): {}'.format(str("%.2f" % self.CustoTotalHectare)))
 		pdf.drawString(260, x-20, 'Custo total da operação (R$): {}'.format(str("%.2f" % self.CustoTotal)))
+		pdf.rotate(90)
+		pdf.setFillColor('black')
+		pdf.drawString(95, -410, 'Reais por hora (R$/h)')
+		pdf.drawString(95, -210, 'Reais por hora (R$/h)')
+		pdf.drawString(95, -15, 'Reais por hora (R$/h)')
+		pdf.rotate(-90)
+		pdf.drawString(50, 250, 'Custos fixos Trator')
+		pdf.drawString(230, 250, 'Custos fixos Implemento')
+		pdf.drawString(440, 250, 'Custos operacionais')
+		graficoCustoFixoTrator = self.GraficoCustoFixoTrator()
+		graficoCustoFixoImplemento = self.GraficoCustoFixoImplemento()
+		graficoCustoVariavel = self.GraficoCustoVariavel()
+		renderPDF.draw(graficoCustoFixoTrator, pdf, 35, 70)
+		renderPDF.draw(graficoCustoFixoImplemento, pdf, 235, 70)
+		renderPDF.draw(graficoCustoVariavel, pdf, 430, 70)
 		pdf.save()
-		messagebox.showinfo(title="Sucesso", message="O arquivo foi salvo na pasta onde se encontra o programa.")
+		messagebox.showinfo(title="Sucesso", message="O arquivo foi salvo na pasta 'Relatorios', localizada onde se encontra o programa.")
 		self.master.focus_force()
 		return
 
@@ -464,5 +493,56 @@ class OutputsPage():
 		self.conn.commit() #Commitando as alterações
 		self.conn.close() #Fechando a conexão
 
+	def GraficoCustoFixoTrator(self):
+		grafico = Drawing(200,200)
+		dados = [(self.DepreciacaoTrator, self.JuroTrator, self.GaragemTrator, self.SeguroTrator),]
+		barras = VerticalBarChart()
+		barras.x = 0
+		barras.y = 0
+		barras.height = 150
+		barras.width = 150
+		barras.data = dados
+		barras.barLabelFormat = DecimalFormatter(2)
+		barras.barLabels.nudge = 6
+		barras.categoryAxis.categoryNames = ['Depreciação', 'Juros', 'Garagem', 'Seguro']
+		barras.categoryAxis.labels.angle = 45
+		barras.categoryAxis.labels.boxAnchor = 'ne'
+		grafico.add(barras)
+		return grafico
+
+	def GraficoCustoFixoImplemento(self):
+		grafico = Drawing(200,200)
+		dados = [(self.DepreciacaoImplemento, self.JuroImplemento, self.GaragemImplemento, self.SeguroImplemento),]
+		barras = VerticalBarChart()
+		barras.x = 0
+		barras.y = 0
+		barras.height = 150
+		barras.width = 150
+		barras.data = dados
+		barras.barLabelFormat = DecimalFormatter(2)
+		barras.barLabels.nudge = 6
+		barras.categoryAxis.categoryNames = ['Depreciação', 'Juros', 'Garagem', 'Seguro']
+		barras.categoryAxis.labels.angle = 45
+		barras.categoryAxis.labels.boxAnchor = 'ne'
+		grafico.add(barras)
+		return grafico
+
+	def GraficoCustoVariavel(self):
+		grafico = Drawing(200, 200)
+		dados = [(self.CustoCombHora, self.CustoOleoHora, self.CustoManutencaoHoraTrator, self.PrecoTratorista),]
+		barras = VerticalBarChart()
+		barras.x = 0
+		barras.y = 0
+		barras.height = 150
+		barras.width = 150
+		barras.data = dados
+		barras.barLabelFormat = DecimalFormatter(2)
+		barras.barLabels.nudge = 6
+		barras.categoryAxis.categoryNames = ['Combustível', 'Óleo', 'Manutenção', 'Operador']
+		barras.categoryAxis.labels.angle = 45
+		barras.categoryAxis.labels.boxAnchor = 'ne'
+		grafico.add(barras)
+		return grafico
+	
 
 

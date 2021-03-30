@@ -7,6 +7,8 @@ class ImplementoPage:
 	def __init__(self, master):
 		self.master = master
 		self.master.title('Implementos')
+		self.master.resizable(False, False)
+		self.master.iconbitmap('icon.ico')
 
 		#GUI dos inputs
 		self.frame_inputs = tk.Frame(self.master)

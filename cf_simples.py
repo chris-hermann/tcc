@@ -6,6 +6,8 @@ class CFPage:
 	def __init__(self, master):
 		self.master = master
 		self.master.title('Simulação simples do custo fixo')
+		self.master.iconbitmap('icon.ico')
+		self.master.resizable(False, False)
 		self.frame_inputs = tk.Frame(self.master)
 		self.spacerFrame1 = tk.Frame(self.master)
 		self.frame_trv = tk.Frame(self.master)
@@ -14,6 +16,7 @@ class CFPage:
 		self.frame_inputs.grid()
 		self.frame_trv.grid()
 		self.frame_buttons.grid()
+
 
 		self.combo = tk.ttk.Combobox(self.frame_inputs, values=['Tratores', 'Implementos'])
 		self.combo.grid(row=0, column=1)
@@ -140,14 +143,23 @@ class CFPage:
 
 	def calculate(self):
 		self.depreciacao = (self.vCompra - (self.vCompra * 0.1))/(self.vidaUtil * self.horaAno)
-		self.juro = ((self.vJuro / 100) * ((self.vCompra + (self.vCompra + 0.1))) / 2)/(self.vidaUtil * self.horaAno)
+		self.Ano=1
+		self.ValorInicial = self.vCompra
+		self.JuroTotal = 0
+		while self.Ano<=self.vidaUtil:
+			self.ValorFinal = self.ValorInicial-((self.depreciacao*self.horaAno))
+			self.JuroAnual = ((self.ValorInicial+self.ValorFinal)/2) * (self.vJuro/100)
+			self.JuroTotal = self.JuroTotal + self.JuroAnual
+			self.ValorInicial = self.ValorFinal
+			self.Ano = self.Ano + 1
+		self.juro = self.JuroTotal/(self.vidaUtil * self.horaAno)
 		self.garagem = ((self.vGaragem / 100) * self.vCompra)/(self.vidaUtil * self.horaAno)
 		self.seguro = ((self.vSeguro / 100) * self.vCompra)/(self.vidaUtil * self.horaAno)
 		self.cfsimples_total = self.depreciacao + self.juro + self.garagem + self.seguro
 		self.cfsimples_hora = self.cfsimples_total / (self.vidaUtil * self.horaAno)
-		self.cf_totalLabel.config(text='O custo fixo total será de ' + str("%.3f" % self.cfsimples_total) + ' reais ao longo de toda a vida útil especificada.')
-		self.cf_depreciacaoLabel.config(text='   O custo de depreciação será de ' + str("%.3f" % self.depreciacao) + ' reais.')
-		self.cf_juroLabel.config(text='   O custo de juro sobre o capital será de ' + str("%.3f" % self.juro) + ' reais.')
-		self.cf_garagemLabel.config(text='   O custo com garagem será de ' + str("%.3f" % self.garagem) + ' reais.')
-		self.cf_seguroLabel.config(text='   O custo com seguro será de ' + str("%.3f" % self.seguro) + ' reais.')
-		self.cf_horaLabel.config(text='O custo fixo diluido nas horas trabalhadas será de ' + str("%.3f" % self.cfsimples_hora) + ' reais.')
+		self.cf_totalLabel.config(text='O custo-fixo horário será de ' + str("%.2f" % self.cfsimples_total) + ' R$/h.')
+		self.cf_depreciacaoLabel.config(text='   O custo de depreciação será de ' + str("%.2f" % self.depreciacao) + ' R$/h.')
+		self.cf_juroLabel.config(text='   O custo de juro sobre o capital será de ' + str("%.2f" % self.juro) + ' R$/h.')
+		self.cf_garagemLabel.config(text='   O custo com garagem será de ' + str("%.2f" % self.garagem) + ' R$/h.')
+		self.cf_seguroLabel.config(text='   O custo com seguro será de ' + str("%.2f" % self.seguro) + ' R$/h.')
+
